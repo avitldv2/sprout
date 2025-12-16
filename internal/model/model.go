@@ -25,6 +25,7 @@ type Paths struct {
 type Config struct {
 	BaseURL    string `toml:"base_url"`
 	PrettyURLs bool   `toml:"pretty_urls"`
+	UnsafeHTML bool   `toml:"unsafe_html"`
 	Paths      struct {
 		Content   string `toml:"content"`
 		Templates string `toml:"templates"`
@@ -36,6 +37,7 @@ type Config struct {
 type ResolvedConfig struct {
 	BaseURL    string
 	PrettyURLs bool
+	UnsafeHTML bool
 	Paths      Paths
 }
 

@@ -12,6 +12,7 @@ func CreateSnapshot(contentDir, templatesDir, staticDir string) (*Snapshot, erro
 		ContentFiles:  make(map[string]FileEntry),
 		TemplateFiles: make(map[string]FileEntry),
 		StaticFiles:   make(map[string]FileEntry),
+		ConfigFile:    nil,
 	}
 
 	if err := snapshotDir(contentDir, snapshot.ContentFiles); err != nil {
@@ -26,6 +27,21 @@ func CreateSnapshot(contentDir, templatesDir, staticDir string) (*Snapshot, erro
 		return nil, err
 	}
 
+	return snapshot, nil
+}
+
+func CreateSnapshotWithConfig(contentDir, templatesDir, staticDir, configPath string) (*Snapshot, error) {
+	snapshot, err := CreateSnapshot(contentDir, templatesDir, staticDir)
+	if err != nil {
+		return nil, err
+	}
+	
+	configFile, err := SnapshotConfigFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+	snapshot.ConfigFile = configFile
+	
 	return snapshot, nil
 }
 
@@ -61,6 +77,17 @@ func Diff(cache *Cache, snapshot *Snapshot) *Plan {
 		TemplatesChanged: false,
 	}
 
+	configChanged := false
+	if snapshot.ConfigFile != nil {
+		if cache.ConfigFile == nil {
+			configChanged = true
+		} else if cache.ConfigFile.MTime != snapshot.ConfigFile.MTime || cache.ConfigFile.Size != snapshot.ConfigFile.Size {
+			configChanged = true
+		}
+	} else if cache.ConfigFile != nil {
+		configChanged = true
+	}
+
 	for path, entry := range snapshot.TemplateFiles {
 		oldEntry, exists := cache.TemplateFiles[path]
 		if !exists || oldEntry.MTime != entry.MTime || oldEntry.Size != entry.Size {
@@ -76,7 +103,7 @@ func Diff(cache *Cache, snapshot *Snapshot) *Plan {
 		}
 	}
 
-	if plan.TemplatesChanged {
+	if plan.TemplatesChanged || configChanged {
 		for path := range snapshot.ContentFiles {
 			plan.PagesToRebuild = append(plan.PagesToRebuild, path)
 		}

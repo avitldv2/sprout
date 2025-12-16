@@ -16,6 +16,7 @@ func Load(root string) (*model.Config, error) {
 	cfg := &model.Config{
 		BaseURL:    "http://localhost:1313",
 		PrettyURLs: true,
+		UnsafeHTML: false,
 	}
 	cfg.Paths.Content = "content"
 	cfg.Paths.Templates = "templates"
@@ -41,6 +42,7 @@ func Resolve(cfg *model.Config, root string) (*model.ResolvedConfig, error) {
 	resolved := &model.ResolvedConfig{
 		BaseURL:    cfg.BaseURL,
 		PrettyURLs: cfg.PrettyURLs,
+		UnsafeHTML: cfg.UnsafeHTML,
 		Paths: model.Paths{
 			Content:   filepath.Join(root, cfg.Paths.Content),
 			Templates: filepath.Join(root, cfg.Paths.Templates),

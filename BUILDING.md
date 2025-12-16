@@ -67,6 +67,7 @@ my-site/
 ```toml
 base_url = "http://localhost:1313"
 pretty_urls = true
+unsafe_html = false
 
 [paths]
 content = "content"
@@ -74,6 +75,12 @@ templates = "templates"
 static = "static"
 public = "public"
 ```
+
+**Configuration Options:**
+
+- `base_url` (string): Base URL for your site. Used in templates and for generating absolute URLs.
+- `pretty_urls` (boolean): Generate clean URLs with trailing slashes (default: `true`).
+- `unsafe_html` (boolean): Allow raw HTML in Markdown files (default: `false`). When `false`, HTML tags in Markdown are stripped for security. Set to `true` to enable raw HTML rendering.
 
 ## Content Files
 
@@ -108,6 +115,26 @@ Front matter is TOML between `+++` delimiters at the top of the file.
 - If you specify a `slug`, it overrides the directory structure in the URL.
 - To preserve directory structure, omit the `slug` field.
 - Front matter is optional - files without it work fine.
+
+### Raw HTML in Markdown
+
+By default, Sprout strips raw HTML from Markdown files for security. To enable raw HTML:
+
+1. Set `unsafe_html = true` in your `sprout.toml`:
+
+```toml
+unsafe_html = true
+```
+
+2. Use HTML directly in your Markdown:
+
+```markdown
+<div class="custom-class">
+    <p>This HTML will be rendered as-is.</p>
+</div>
+```
+
+**Security Note**: Only enable `unsafe_html` if you trust the content of your Markdown files. Raw HTML can be used for XSS attacks if content comes from untrusted sources.
 
 ### File Naming
 
@@ -446,6 +473,42 @@ sprout serve --livereload
 Pages automatically reload when you save changes.
 
 ## Advanced Topics
+
+### Unsafe HTML Configuration
+
+The `unsafe_html` setting controls whether raw HTML in Markdown files is rendered or stripped:
+
+- **`unsafe_html = false`** (default): All HTML tags in Markdown are removed. This is the safe default.
+- **`unsafe_html = true`**: Raw HTML in Markdown is rendered as-is.
+
+**When to enable:**
+
+- You need custom HTML elements in your content
+- You're embedding iframes, custom components, or complex layouts
+- You trust all content sources
+
+**When to keep disabled:**
+
+- Content comes from user input or external sources
+- You want maximum security
+- You prefer pure Markdown without HTML
+
+**Example usage:**
+
+```markdown
++++
+title = "Custom Layout"
++++
+
+## My Content
+
+<div class="custom-wrapper">
+    <p>This paragraph is wrapped in a custom div.</p>
+    <iframe src="https://example.com/embed"></iframe>
+</div>
+```
+
+With `unsafe_html = true`, the HTML is rendered. With `unsafe_html = false`, only the text content appears.
 
 ### Subdirectories and Organization
 

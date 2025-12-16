@@ -129,7 +129,8 @@ func checkSourcesChanged(root string, resolved *model.ResolvedConfig) (bool, err
 		return true, nil
 	}
 
-	snapshot, err := cache.CreateSnapshot(resolved.Paths.Content, resolved.Paths.Templates, resolved.Paths.Static)
+	configPath := filepath.Join(root, "sprout.toml")
+	snapshot, err := cache.CreateSnapshotWithConfig(resolved.Paths.Content, resolved.Paths.Templates, resolved.Paths.Static, configPath)
 	if err != nil {
 		return false, err
 	}

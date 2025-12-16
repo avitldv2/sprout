@@ -77,7 +77,8 @@ func Build(root string, clean bool) (*BuildResult, error) {
 		return nil, fmt.Errorf("failed to load cache: %w", err)
 	}
 
-	snapshot, err := cache.CreateSnapshot(resolved.Paths.Content, resolved.Paths.Templates, resolved.Paths.Static)
+	configPath := filepath.Join(rootAbs, "sprout.toml")
+	snapshot, err := cache.CreateSnapshotWithConfig(resolved.Paths.Content, resolved.Paths.Templates, resolved.Paths.Static, configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create snapshot: %w", err)
 	}
@@ -130,6 +131,7 @@ func Build(root string, clean bool) (*BuildResult, error) {
 		ContentFiles:  snapshot.ContentFiles,
 		TemplateFiles: snapshot.TemplateFiles,
 		StaticFiles:   snapshot.StaticFiles,
+		ConfigFile:    snapshot.ConfigFile,
 	}
 	if err := cache.SaveCache(cachePath, newCache); err != nil {
 		return nil, fmt.Errorf("failed to save cache: %w", err)
@@ -158,7 +160,7 @@ func buildPage(contentPath string, resolved *model.ResolvedConfig, site model.Si
 		return fmt.Errorf("content file is empty: %s", contentPath)
 	}
 
-	fm, html, _, err := content.ParseAndRender(contentPath, raw)
+	fm, html, _, err := content.ParseAndRender(contentPath, raw, resolved.UnsafeHTML)
 	if err != nil {
 		return fmt.Errorf("failed to parse content: %w", err)
 	}

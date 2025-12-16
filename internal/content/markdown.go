@@ -7,13 +7,24 @@ import (
 	"sprout/internal/model"
 
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
-var md = goldmark.New(
-	goldmark.WithExtensions(),
-)
+func newMarkdownRenderer(unsafeHTML bool) goldmark.Markdown {
+	var opts []goldmark.Option
+	
+	opts = append(opts, goldmark.WithExtensions(extension.GFM))
+	
+	if unsafeHTML {
+		opts = append(opts, goldmark.WithRendererOptions(html.WithUnsafe()))
+	}
 
-func RenderMarkdown(markdown []byte) ([]byte, string, error) {
+	return goldmark.New(opts...)
+}
+
+func RenderMarkdown(markdown []byte, unsafeHTML bool) ([]byte, string, error) {
+	md := newMarkdownRenderer(unsafeHTML)
 	var buf bytes.Buffer
 	if err := md.Convert(markdown, &buf); err != nil {
 		return nil, "", err
@@ -37,13 +48,13 @@ func extractFirstH1(markdown []byte) string {
 	return ""
 }
 
-func ParseAndRender(sourcePath string, raw []byte) (*model.FrontMatter, []byte, string, error) {
+func ParseAndRender(sourcePath string, raw []byte, unsafeHTML bool) (*model.FrontMatter, []byte, string, error) {
 	fm, markdown, err := ParsePage(sourcePath, raw)
 	if err != nil {
 		return nil, nil, "", err
 	}
 
-	html, derivedTitle, err := RenderMarkdown(markdown)
+	html, derivedTitle, err := RenderMarkdown(markdown, unsafeHTML)
 	if err != nil {
 		return nil, nil, "", err
 	}

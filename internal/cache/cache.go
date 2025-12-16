@@ -18,13 +18,15 @@ type Cache struct {
 	ContentFiles  map[string]FileEntry `json:"content_files"`
 	TemplateFiles map[string]FileEntry `json:"template_files"`
 	StaticFiles   map[string]FileEntry `json:"static_files"`
-	BuildTime     time.Time             `json:"build_time"`
+	ConfigFile    *FileEntry           `json:"config_file,omitempty"`
+	BuildTime     time.Time            `json:"build_time"`
 }
 
 type Snapshot struct {
 	ContentFiles  map[string]FileEntry
 	TemplateFiles map[string]FileEntry
 	StaticFiles   map[string]FileEntry
+	ConfigFile    *FileEntry
 }
 
 type Plan struct {
@@ -62,6 +64,20 @@ func LoadCache(path string) (*Cache, error) {
 	}
 
 	return &cache, nil
+}
+
+func SnapshotConfigFile(configPath string) (*FileEntry, error) {
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return nil, nil
+	}
+	fp, err := fsutil.Fingerprint(configPath)
+	if err != nil {
+		return nil, err
+	}
+	return &FileEntry{
+		MTime: fp.MTime,
+		Size:  fp.Size,
+	}, nil
 }
 
 func SaveCache(path string, cache *Cache) error {

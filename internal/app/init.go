@@ -16,6 +16,7 @@ func Init(root string) error {
 
 	configContent := `base_url = "http://localhost:1313"
 pretty_urls = true
+unsafe_html = false
 
 [paths]
 content = "content"
