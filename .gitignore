@@ -1,6 +1,11 @@
 sprout
 *.tmp
+public/
 .sprout-cache.json
 *.swp
 *.swo
 *~
+.DS_Store
+.vscode/
+.idea/
+
