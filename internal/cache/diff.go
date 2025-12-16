@@ -77,6 +77,7 @@ func Diff(cache *Cache, snapshot *Snapshot) *Plan {
 		TemplatesChanged: false,
 	}
 
+	// Check if config file changed
 	configChanged := false
 	if snapshot.ConfigFile != nil {
 		if cache.ConfigFile == nil {
@@ -103,6 +104,7 @@ func Diff(cache *Cache, snapshot *Snapshot) *Plan {
 		}
 	}
 
+	// If config or templates changed, rebuild all pages
 	if plan.TemplatesChanged || configChanged {
 		for path := range snapshot.ContentFiles {
 			plan.PagesToRebuild = append(plan.PagesToRebuild, path)
