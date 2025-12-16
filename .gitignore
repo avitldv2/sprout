@@ -1,0 +1,6 @@
+sprout
+*.tmp
+.sprout-cache.json
+*.swp
+*.swo
+*~
